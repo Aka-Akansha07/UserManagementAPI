@@ -1,10 +1,14 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Register services
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer(); // Required
+builder.Services.AddEndpointsApiExplorer(); // Needed for Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -16,19 +20,19 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Configure middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger(); // Generates swagger JSON
+    app.UseSwaggerUI(c => // Swagger UI page
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "User Management API V1");
+    });
+}
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Enable Swagger
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "User Management API V1");
-});
-
 app.Run();
-
-
 
